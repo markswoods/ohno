@@ -27,11 +27,12 @@ class Node
     @number = number
     @complete = complete
   end
+
   def to_s
     case @color
     when "Blue"
       if @numbered
-        return number
+        return number.to_s
       else
         return "B"
       end
@@ -74,6 +75,39 @@ def showboard(board)
   return text
 end
 
+def countBlueDots(row, col)
+  count = 0
+  if col < row.length-1   # not on right edge, count dots to the right
+    for i in col+1..row.length-1
+      if row[i].color == "Blue"
+        count += 1
+      else
+        break
+      end
+    end
+  end
+  if col > 0  # not on left edge, count dots to the left
+    for i in col-1..0
+      if row[i].color == "Blue"
+        count += 1
+      else
+        break
+      end
+    end
+  end
+  
+  return count  
+end
+
+def complete(board, row, col)
+  # takes the board and for the node @ row, col adds a terminating
+  # red dot in each direction
+  # Note: I'll need to find the first open node for this, making this
+  # routine feel really similar to countBlue Dots. I should be able to refactor that routine a bit.
+  # Maybe I should have it return the first open position in each direction. That simplifies the count
+  # AND facilitates adding the Red stops.
+  
+end
 # Look for an incomplete Numbered Dot.
 # Can it see all its dots? 
 #    If so, add a red terminus at first Empty node in row and column, mark Node Complete
@@ -92,7 +126,18 @@ def doMoves(board)
     for row in 0..board.length-1
       for col in 0..board.length-1
         if board[row][col].numbered && !board[row][col].complete
-          # Start working it right here
+          n = board[row][col] # the node of interest
+          # Can it see all of its dots?
+          if true 
+            cr = countBlueDots(board[row], col)
+            cc = countBlueDots(board.transpose[col], row)
+            debug("#{row},#{col} can see #{cr + cc} dots\n")
+            if cr + cc == n.number
+              debug("#{row},#{col} can see all its dots\n")
+              complete(board, row, col)
+            end
+          end
+          
         end
       end
     end   # Row pass complete
@@ -124,7 +169,7 @@ file = File.open(fname).readlines.each do |line|
     when "-"
       n = Node.new("Empty", false, 0, false)
     else
-      n = Node.new("Blue", true, c, false)
+      n = Node.new("Blue", true, c.to_i, false)
     end
     row.push(n)
   end  
